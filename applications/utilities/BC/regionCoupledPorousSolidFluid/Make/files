@@ -1,0 +1,3 @@
+regionCoupledPorousSolidFluidFvPatchScalarField.C
+
+LIB = $(FOAM_USER_LIBBIN)/libregionCoupledPorousSolidFluid

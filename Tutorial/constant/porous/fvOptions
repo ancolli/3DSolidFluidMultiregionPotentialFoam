@@ -1,0 +1,220 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  6                                     |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+reaction1
+{
+    type            scalarCodedSource;
+    active          true;//yes;
+    name            reaction1;
+    selectionMode   all;//cellZone;
+   
+
+    scalarCodedSourceCoeffs
+    {
+        selectionMode   all;
+	fields        (fi_s);
+
+        codeInclude
+        #{
+             #include "fvm.H"
+        #};
+
+        codeCorrect
+        #{
+            //Pout<< "**codeCorrect**" << endl;
+        #};
+
+        codeAddSup
+        #{
+	    const dimensionedScalar F("F",dimensionSet(0,0,1,0,-1,1,0), 96485);//[kg m s K mol A cd]
+	    const dimensionedScalar j0("j0",dimensionSet(0,-2,0,0,0,1,0), 1e-1);//[kg m s K mol A cd]
+	    const dimensionedScalar beta_a("beta_a",dimensionSet(1,2,-3,0,0,-1,0), 0.05);//[kg m s K mol A cd]
+	    const dimensionedScalar beta_c("beta_c",dimensionSet(1,2,-3,0,0,-1,0), -0.05);//[kg m s K mol A cd]
+	    const dimensionedScalar km("km",dimensionSet(0,1,-1,0,0,0,0), 1e-4);//[kg m s K mol A cd]
+	    const dimensionedScalar Ae("Ae",dimensionSet(0,-1,0,0,0,0,0), 1000);//[kg m s K mol A cd]
+
+            const volScalarField& fi_f = mesh_.lookupObject<volScalarField>("fi_f");
+	    const volScalarField& fi_s = mesh_.lookupObject<volScalarField>("fi_s");
+	    const volScalarField& C_ = mesh_.lookupObject<volScalarField>("C_"); 
+
+	    const volScalarField jlim = -F*km*C_;  
+
+	    const volScalarField f = exp((fi_s-fi_f)/beta_a)-exp((fi_s-fi_f)/beta_c);
+	    const volScalarField fprime = exp((fi_s-fi_f)/beta_a)/beta_a-exp((fi_s-fi_f)/beta_c)/beta_c;
+	    const volScalarField g = 1/j0-exp((fi_s-fi_f)/beta_c)/jlim;	
+	    const volScalarField gprime = -exp((fi_s-fi_f)/beta_c)/jlim/beta_c;
+	    const volScalarField dj_dfi = (g*fprime-f*gprime)/pow(g,2);
+      
+            eqn += Ae*(f/g-fi_s*dj_dfi) + fvm::Sp(Ae*dj_dfi,fi_s);//
+        #};
+
+        codeSetValue
+        #{
+            //Pout<< "**codeSetValue**" << endl;
+        #};
+
+        // Dummy entry. Make dependent on above to trigger recompilation
+        code
+        #{
+            $codeInclude
+            $codeCorrect
+            $codeAddSup
+            $codeSetValue
+        #};
+    }
+
+    sourceTimeCoeffs
+    {
+        // Dummy entry
+    }
+}
+reaction2
+{
+    type            scalarCodedSource;
+    active          true;//yes;
+    name            reaction2;
+    selectionMode   all;//cellZone;
+   
+
+    scalarCodedSourceCoeffs
+    {
+        selectionMode   all;
+	fields        (fi_f);
+
+        codeInclude
+        #{
+             #include "fvm.H"
+        #};
+
+        codeCorrect
+        #{
+            //Pout<< "**codeCorrect**" << endl;
+        #};
+
+        codeAddSup
+        #{
+	    const dimensionedScalar F("F",dimensionSet(0,0,1,0,-1,1,0), 96485);//[kg m s K mol A cd]
+	    const dimensionedScalar j0("j0",dimensionSet(0,-2,0,0,0,1,0), 1e-1);//[kg m s K mol A cd]
+	    const dimensionedScalar beta_a("beta_a",dimensionSet(1,2,-3,0,0,-1,0), 0.05);//[kg m s K mol A cd]
+	    const dimensionedScalar beta_c("beta_c",dimensionSet(1,2,-3,0,0,-1,0), -0.05);//[kg m s K mol A cd]
+	    const dimensionedScalar km("km",dimensionSet(0,1,-1,0,0,0,0), 1e-4);//[kg m s K mol A cd]
+	    const dimensionedScalar Ae("Ae",dimensionSet(0,-1,0,0,0,0,0), 1000);//[kg m s K mol A cd]
+
+	    const volScalarField& fi_f = mesh_.lookupObject<volScalarField>("fi_f");
+	    const volScalarField& fi_s = mesh_.lookupObject<volScalarField>("fi_s");
+	    const volScalarField& C_ = mesh_.lookupObject<volScalarField>("C_"); 
+
+	    const volScalarField jlim = -F*km*C_;
+
+ 	    const volScalarField f = exp((fi_s-fi_f)/beta_a)-exp((fi_s-fi_f)/beta_c);
+	    const volScalarField fprime = -(exp((fi_s-fi_f)/beta_a)/beta_a-exp((fi_s-fi_f)/beta_c)/beta_c);
+	    const volScalarField g = 1/j0-exp((fi_s-fi_f)/beta_c)/jlim;	
+	    const volScalarField gprime = exp((fi_s-fi_f)/beta_c)/jlim/beta_c;
+	    const volScalarField dj_dfi = (g*fprime-f*gprime)/pow(g,2);
+
+            eqn += -Ae*(f/g-fi_f*dj_dfi) - fvm::Sp(Ae*dj_dfi,fi_f); 			
+        #};
+
+        codeSetValue
+        #{
+            //Pout<< "**codeSetValue**" << endl;
+        #};
+
+        // Dummy entry. Make dependent on above to trigger recompilation
+        code
+        #{
+            $codeInclude
+            $codeCorrect
+            $codeAddSup
+            $codeSetValue
+        #};
+    }
+
+    sourceTimeCoeffs
+    {
+        // Dummy entry
+    }
+}
+
+reaction3
+{
+    type            scalarCodedSource;
+    active          true;//yes;
+    name            reaction3;
+    selectionMode   all;//cellZone;
+   
+
+    scalarCodedSourceCoeffs
+    {
+        selectionMode   all;
+	fields        (C_);
+
+        codeInclude
+        #{
+             #include "fvm.H"
+        #};
+
+        codeCorrect
+        #{
+            //Pout<< "**codeCorrect**" << endl;
+        #};
+
+        codeAddSup
+        #{                                            
+	    const dimensionedScalar F("F",dimensionSet(0,0,1,0,-1,1,0), 96485);//[kg m s K mol A cd]
+	    const dimensionedScalar j0("j0",dimensionSet(0,-2,0,0,0,1,0), 1e-1);//[kg m s K mol A cd]
+	    const dimensionedScalar beta_a("beta_a",dimensionSet(1,2,-3,0,0,-1,0), 0.05);//[kg m s K mol A cd]
+	    const dimensionedScalar beta_c("beta_c",dimensionSet(1,2,-3,0,0,-1,0), -0.05);//[kg m s K mol A cd]
+	    const dimensionedScalar km("km",dimensionSet(0,1,-1,0,0,0,0), 1e-4);//[kg m s K mol A cd]
+	    const dimensionedScalar Ae("Ae",dimensionSet(0,-1,0,0,0,0,0), 1000);//[kg m s K mol A cd]
+
+	    const volScalarField& fi_f = mesh_.lookupObject<volScalarField>("fi_f");
+	    const volScalarField& fi_s = mesh_.lookupObject<volScalarField>("fi_s");
+	    const volScalarField& C_ = mesh_.lookupObject<volScalarField>("C_"); 
+
+	    const volScalarField jlim = -F*km*C_;
+
+            const volScalarField f = exp((fi_s-fi_f)/beta_a)-exp((fi_s-fi_f)/beta_c);
+	    const volScalarField g = 1/j0-exp((fi_s-fi_f)/beta_c)/jlim;	
+
+            eqn += Ae*(f/g)/F; 			
+        #};
+
+        codeSetValue
+        #{
+            //Pout<< "**codeSetValue**" << endl;
+        #};
+
+        // Dummy entry. Make dependent on above to trigger recompilation
+        code
+        #{
+            $codeInclude
+            $codeCorrect
+            $codeAddSup
+            $codeSetValue
+        #};
+    }
+
+    sourceTimeCoeffs
+    {
+        // Dummy entry
+    }
+}
+
+
+// ************************************************************************* //
+

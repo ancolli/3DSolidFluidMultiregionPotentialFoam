@@ -1,0 +1,23 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+# Cite as: Electrochimica Acta 290 (2018) 676-685
+# https://doi.org/10.1016/j.electacta.2018.09.121
+
+# see: https://github.com/ancolli/secondaryCurrentDistributionFoam
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+runApplication blockMesh
+runApplication topoSet
+runApplication splitMeshRegions -cellZones -overwrite
+
+#-- Run on single processor
+runApplication `getApplication`
+
+# Post-process
+# multiRegionPotentialFoam -postProcess -func surfaces -latestTime -region electrolyte
+paraFoam -touchAll
+
+# ----------------------------------------------------------------- end-of-file
