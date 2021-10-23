@@ -1,7 +1,7 @@
 # v1.0.0
 
-Cite as: ...
-https:...
+Cite as: Colli, AN, Bisang, JM. A multi-region and open-source computational fluid dynamic tool for electrochemical systems with three-dimensional electrodes. AIChE J. 2021; 67( 11):e17371.
+DOI :  https://doi.org/10.1002/aic.17371
 
 # 3DSolidFluidMultiregionPotentialFoam
 It is described how to simulate primary (when kinetic parameters of very fast electrochemical reactions are used), secondary and tertiary current distribution in electrochemical reactors with a multiregion approach (solve 3D (porous), solid and fluid phases) with the help of OpenFOAM, the developed solver multiRegionPorousPotentialFoam and the BC regionCoupledSolidFluid and regionCoupledPorousSolidFluid. It shows how to pre-process and run a basic case in a 2D domain. 
