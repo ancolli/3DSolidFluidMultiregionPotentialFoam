@@ -1,8 +1,8 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
 
-# Cite as: Electrochimica Acta 290 (2018) 676-685
-# https://doi.org/10.1016/j.electacta.2018.09.121
+# AIChE J. 2021;67(11):e17371
+# DOI : https://doi.org/10.1002/aic.17371
 
 # see: https://github.com/ancolli/secondaryCurrentDistributionFoam
 
