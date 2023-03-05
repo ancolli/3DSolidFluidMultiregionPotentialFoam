@@ -4,8 +4,6 @@ cd ${0%/*} || exit 1    # run from this directory
 # AIChE J. 2021;67(11):e17371
 # DOI : https://doi.org/10.1002/aic.17371
 
-# see: https://github.com/ancolli/secondaryCurrentDistributionFoam
-
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
